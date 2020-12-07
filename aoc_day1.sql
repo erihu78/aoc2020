@@ -1,0 +1,8 @@
+-- Input is stored in simple table 
+-- CREATE TABLE AOC1 (ID NUMBER,VAL VARCHAR2(100));
+-- ID is just a sequence to use as as primary key, VAL is the row from input-text.
+
+-- Part 1
+SELECT DISTINCT A.VAL*B.VAL FROM AOC1 A CROSS JOIN AOC1 B WHERE A.ID!=B.ID AND A.VAL+B.VAL=2020;
+--Part 2
+SELECT DISTINCT A.VAL*B.VAL*C.VAL FROM AOC1 A CROSS JOIN AOC1 B CROSS JOIN AOC1 C WHERE A.ID!=B.ID AND A.ID!=C.ID AND A.VAL+B.VAL+C.VAL=2020;
