@@ -1,5 +1,5 @@
 -- Input is stored in simple table 
--- CREATE TABLE AOC1 (ID NUMBER,VAL VARCHAR2(100));
+-- CREATE TABLE AOC2 (ID NUMBER,VAL VARCHAR2(100));
 -- ID is just a sequence to use as as primary key, VAL is the row from input-text.
 
 --Part 1
