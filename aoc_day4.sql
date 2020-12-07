@@ -1,0 +1,62 @@
+-- Input is stored in simple table 
+-- CREATE TABLE AOC4 (ID NUMBER,VAL VARCHAR2(100));
+-- ID is just a sequence to use as as primary key, VAL is the row from input-text.
+
+--Part 1
+WITH PASSPORT AS (
+SELECT START_ROW,
+regexp_substr(LIST_VAL, 'byr:[^ ]+', 1, 1) as BYR,
+regexp_substr(LIST_VAL, 'iyr:[^ ]+', 1, 1) as IYR,
+regexp_substr(LIST_VAL, 'eyr:[^ ]+', 1, 1) as EYR,
+regexp_substr(LIST_VAL, 'hgt:[^ ]+', 1, 1) as HGT,
+regexp_substr(LIST_VAL, 'hcl:[^ ]+', 1, 1) as HCL,
+regexp_substr(LIST_VAL, 'ecl:[^ ]+', 1, 1) as ECL,
+regexp_substr(LIST_VAL, 'pid:[^ ]+', 1, 1) as PID,
+regexp_substr(LIST_VAL, 'cid:[^ ]+', 1, 1) as CID
+FROM (
+SELECT A.START_ROW,A.END_ROW,LISTAGG(B.VAL,' ') WITHIN GROUP(ORDER BY B.ID) AS LIST_VAL  FROM (
+SELECT ID AS START_ROW,NVL(LEAD(ID,1) OVER (ORDER BY ID)-1,LAST_ROW) AS END_ROW,VAL,PREV_ROW,PREV_ROW_IS_NULL FROM (
+SELECT ID,VAL,
+LAG(VAL,1) OVER (ORDER BY ID) AS PREV_ROW,
+NVL2(LAG(VAL,1) OVER (ORDER BY ID),0,1) AS PREV_ROW_IS_NULL,
+MAX(ID) OVER() AS LAST_ROW
+FROM AOC4
+) WHERE PREV_ROW IS NULL
+) A INNER JOIN AOC4 B ON B.ID BETWEEN A.START_ROW AND A.END_ROW
+GROUP BY A.START_ROW,A.END_ROW ))
+SELECT COUNT(1) FROM PASSPORT
+WHERE NOT (BYR IS NULL OR IYR IS NULL OR EYR IS NULL OR HGT IS NULL OR HCL IS NULL OR ECL IS NULL OR PID IS NULL);
+
+--Part 2
+WITH PASSPORT AS (
+SELECT START_ROW,
+regexp_substr(LIST_VAL, 'byr:(\d+)', 1, 1,NULL,1) as BYR,
+regexp_substr(LIST_VAL, 'iyr:(\d+)', 1, 1,NULL,1) as IYR,
+regexp_substr(LIST_VAL, 'eyr:(\d+)', 1, 1,NULL,1) as EYR,
+regexp_substr(LIST_VAL, 'hgt:(\d+)cm', 1, 1,NULL,1) as HGT_CM,
+regexp_substr(LIST_VAL, 'hgt:(\d+)in', 1, 1,NULL,1) as HGT_IN,
+regexp_substr(LIST_VAL, 'hcl:(#[0-9a-f]{6})[^\d]*', 1, 1,NULL,1) as HCL,
+regexp_substr(LIST_VAL, 'ecl:([^ ]+)', 1, 1,NULL,1) as ECL,
+regexp_substr(LIST_VAL, 'pid:(\d+)', 1, 1,NULL,1) as PID,
+regexp_substr(LIST_VAL, 'cid:([^ ]+)', 1, 1,NULL,1) as CID
+FROM (
+SELECT A.START_ROW,A.END_ROW,LISTAGG(B.VAL,' ') WITHIN GROUP(ORDER BY B.ID) AS LIST_VAL  FROM (
+SELECT ID AS START_ROW,NVL(LEAD(ID,1) OVER (ORDER BY ID)-1,LAST_ROW) AS END_ROW,VAL,PREV_ROW,PREV_ROW_IS_NULL FROM (
+SELECT ID,VAL,
+LAG(VAL,1) OVER (ORDER BY ID) AS PREV_ROW,
+NVL2(LAG(VAL,1) OVER (ORDER BY ID),0,1) AS PREV_ROW_IS_NULL,
+MAX(ID) OVER() AS LAST_ROW
+FROM AOC4
+) WHERE PREV_ROW IS NULL
+) A INNER JOIN AOC4 B ON B.ID BETWEEN A.START_ROW AND A.END_ROW
+GROUP BY A.START_ROW,A.END_ROW ))
+SELECT COUNT(1) FROM PASSPORT A
+WHERE NOT (BYR IS NULL OR IYR IS NULL OR EYR IS NULL OR (HGT_CM IS NULL AND HGT_IN IS NULL) OR HCL IS NULL OR ECL IS NULL OR PID IS NULL)
+AND ECL IN ('amb','blu','brn','gry','grn','hzl','oth')
+AND BYR BETWEEN 1920 and 2002
+AND IYR BETWEEN 2010 and 2020
+AND EYR BETWEEN 2020 and 2030
+AND NVL(HGT_CM,150) BETWEEN 150 and 193
+AND NVL(HGT_IN,59) BETWEEN 59 and 76
+AND LENGTH(PID)=9
+;
